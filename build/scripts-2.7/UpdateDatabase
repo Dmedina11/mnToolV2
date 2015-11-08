@@ -1,0 +1,132 @@
+#!/usr/bin/python
+
+# UpdateDatabase, 
+# 
+# Copyright (C) 23/10/2015 David Alfredo Medina Ortiz  dmedina11@alumnos.utalca.cl
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3 of the License, or
+# any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software Foundation,
+# Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301  USA
+
+#Modulos a utilizar
+import argparse
+
+from ModulosDevice.Cruds import Query
+from ModulosDevice.Cruds import update
+
+#funcion principal...
+def main ():
+
+	#creamos argparse
+	parser = argparse.ArgumentParser(
+	formatter_class=argparse.RawDescriptionHelpFormatter,
+	description="UPDATE Database - Options",
+	epilog=".....................\n.....................")
+
+	#Set arguments
+	parser.add_argument("-c", "--campus", help="Actualizar un campus dado su id")
+	parser.add_argument("-e", "--edificio", help="Actualizar un edificios dado su id")
+	parser.add_argument("-d", "--dispositivo", help="Actualizar un dispositivo dado su serial")
+	parser.add_argument("-m", "--marca", help="Actualizar una marca dada su id")
+	parser.add_argument("-mo", "--modelo", help="Actualizar un modelo dado su id")
+	parser.add_argument("-r", "--rack", help="Actualizar un rack dado su id")
+	parser.add_argument("-n", "--nivel", help="Actualizar un nivel dado su id")
+	parser.add_argument("-t", "--tipo", help="Actualizar un tipo de dispositivo dado su id")
+	parser.add_argument("-en", "--tipo_enlace", help="Actualizar un tipo de enlace dado su id")
+	
+	#Parse argv to args 
+	args = parser.parse_args()
+	
+	#seleccion de opciones
+	#si desea Actualizar un dispositivo:
+	if args.dispositivo:
+
+		#preguntamos si la serial ingresada existe...
+		query = "select * from dispositivo where serial = '%s'"% args.dispositivo
+		if Query.ExistElementInDB(query) == 0:
+			update.UpdateDevice(args.dispositivo)
+		else:
+			print "Serial ingresada no esta registrada en la base de datos"
+
+	#si desea actualizar un nivel...
+	elif args.nivel:
+
+		#preguntamos si el id del nivel ingresado existe...
+		query = "select * from nivel where id_nivel = %d" % int(args.nivel)
+		if Query.ExistElementInDB(query) == 0:
+			update.UpdateNivel(args.nivel)
+		else:
+			print "Id de nivel ingresado no esta registrado en la base de datos"
+
+	#si desea actualizar un nivel...
+	elif args.campus:
+
+		#preguntamos si el id del campo ingresado existe...
+		query = "select * from campus where id_campus = %d" % int(args.campus)
+		if Query.ExistElementInDB(query) == 0:
+			update.UpdateCampus(args.campus)
+		else:
+			print "Id de campus ingresado no esta registrado en la base de datos"	
+	
+	#si desea actualizar un edificio...
+	elif args.edificio:
+
+		#preguntamos si el id del edificio ingresado existe...
+		query = "select * from edificio where id_edif = %d" % int(args.edificio)
+		if Query.ExistElementInDB(query) == 0:
+			update.UpdateEdificio(args.edificio)
+		else:
+			print "Id de edificio ingresado no esta registrado en la base de datos"
+	
+	#si desea actualizar una marca...
+	elif args.marca:
+		#preguntamos si el id de la marca ingresada existe...
+		query = "select * from marca where id_marca = %d" % int(args.marca)
+		if Query.ExistElementInDB(query) == 0:
+			update.UpdateMarca(args.marca)
+		else:
+			print "Id de marca ingresada no esta registrada en la base de datos"
+	
+	#si desea actualizar un modelo...
+	elif args.modelo:
+
+		#preguntamos si el id del modelo ingresado existe...
+		query = "select * from modelo where id_modelo = %d" % int(args.modelo)
+		if Query.ExistElementInDB(query) == 0:
+			update.UpdateModelo(args.modelo)
+		else:
+			print "Id de modelo ingresada no esta registrada en la base de datos"
+				
+	#si desea actualizar un rack...
+	elif args.rack:
+		#preguntamos si el id del rack ingresado existe...
+		query = "select * from rack where id_rack = %d" % int(args.rack)
+		if Query.ExistElementInDB(query) == 0:
+			update.UpdateRack(args.rack)
+		else:
+			print "Id de rack ingresada no esta registrada en la base de datos"
+	
+	#si desea actualizar un tipo de enlace
+	elif args.tipo_enlace:
+		#preguntamos si el id del tipo enlace ingresado existe...
+		query = "select * from tipo_enlace where id_tipo_enlace = %d" % int(args.tipo_enlace)
+		if Query.ExistElementInDB(query) == 0:
+			update.UpdateEnlace(args.tipo_enlace)
+		else:
+			print "Id de tipo enlace ingresada no esta registrada en la base de datos"
+	else:	
+		parser.print_help()
+	return  0
+
+if __name__ == '__main__':
+	main()

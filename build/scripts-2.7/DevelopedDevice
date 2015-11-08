@@ -1,0 +1,8 @@
+#!/usr/bin/python
+
+from ModulosDevice.GenerationTree import MakeTreeFull
+from ModulosDevice.GenerationTree import MakeTreeDispositivos
+
+MakeTreeDispositivos.MakeTreeDevice()
+
+

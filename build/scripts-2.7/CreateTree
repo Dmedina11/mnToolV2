@@ -1,0 +1,52 @@
+#!/usr/bin/python
+
+# CreateTree, script que permite generar un arbol completo o de dispositivos
+# con respecto a la informacion que existe en la base de datos dado a parametros
+# de ingreso.
+# 
+# Copyright (C) 16/10/2015 David Alfredo Medina Ortiz  dmedina11@alumnos.utalca.cl
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3 of the License, or
+# any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software Foundation,
+# Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301  USA
+
+#Modulos a utilizar
+import argparse
+from ModulosDevice.GenerationTree import MakeTreeFull
+from ModulosDevice.GenerationTree import MakeTreeDispositivos
+
+#funcion principal...
+def main ():
+
+	#creamos argparse
+	parser = argparse.ArgumentParser(
+	formatter_class=argparse.RawDescriptionHelpFormatter,
+	description="CreateTree - Options",
+	epilog=".....................\n.....................")
+
+	parser.add_argument("-t", "--tipo_tree", type=int, help="tipo de arbol a desarrollar, 0:full 1:device, por defecto 0", default=0)
+	args = parser.parse_args()
+
+	#creation Full tree...
+	if args.tipo_tree == 0:
+		MakeTreeFull.MakeTree()
+	elif args.tipo_tree == 1:
+		MakeTreeDispositivos.MakeTreeDevice()
+	else:
+		#No set any argument
+		parser.print_help()
+
+	return  0
+
+if __name__ == '__main__':
+	main()

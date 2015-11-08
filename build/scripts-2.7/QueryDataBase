@@ -1,0 +1,111 @@
+#!/usr/bin/python
+
+# QueryDatabase, script que permite generar consultas a la base de datos, estas consultas son:
+# Listar todos los dispositivos
+# Listar todos los campos
+# Listar todos los edificios
+# Listar todos los dispositivos con toda la informacion
+# Listar todos los switch 
+# Listar todos los rowter
+# Listar todos los server
+# Ejecutar una consulta dada por argumento
+# 
+# Copyright (C) 20/10/2015 David Alfredo Medina Ortiz  dmedina11@alumnos.utalca.cl
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3 of the License, or
+# any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software Foundation,
+# Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301  USA
+
+#Modulos a utilizar
+import argparse
+from ModulosDevice.Cruds import Query
+
+#funcion principal...
+def main ():
+
+	#creamos argparse
+	parser = argparse.ArgumentParser(
+	formatter_class=argparse.RawDescriptionHelpFormatter,
+	description="Query Database - Options",
+	epilog=".....................\n.....................")
+
+	#Set arguments
+	parser.add_argument("-c", help="Lista todos los campus con su informacion",action="store_true")
+	parser.add_argument("-e", help="Lista todos los edificios con su informacion",action="store_true")
+	parser.add_argument("-l", help="Lista todos los dispositivos",action="store_true")
+	parser.add_argument("-lc", help="Lista todos los dispositivos con su informacion",action="store_true")
+	parser.add_argument("-sw", help="Lista de Switch",action="store_true")
+	parser.add_argument("-rsw", help="Lista de Router",action="store_true")
+	parser.add_argument("-srv", help="Lista de Servers",action="store_true")
+	parser.add_argument("-qu", help="Ejecuta una consulta")
+	parser.add_argument("-t", "--tree_dispo", help="Dada una serial busca el dispositivo y aquellos que estan asociados a el")
+	
+	#Parse argv to args 
+	args = parser.parse_args()
+	
+	#seleccion de opciones
+	#todos los switch
+	if args.sw:
+		query = "select dispositivo.serial, dispositivo.nom_disp, dispositivo.ip_disp, modelo.nom_modelo, tipo_disp.nom_tipo_disp, marca.nom_marca from dispositivo join modelo on (dispositivo.id_modelo = modelo.id_modelo) join tipo_disp on (tipo_disp.id_tipo_disp = modelo.id_tipo_disp) join marca on (marca.id_marca = modelo.id_marca) where nom_disp like '%sw%'"
+		Query.MakeQuery(query)
+
+	#todos los router
+	elif args.rsw:
+		query = "select dispositivo.serial, dispositivo.nom_disp, dispositivo.ip_disp, modelo.nom_modelo, tipo_disp.nom_tipo_disp, marca.nom_marca from dispositivo join modelo on (dispositivo.id_modelo = modelo.id_modelo) join tipo_disp on (tipo_disp.id_tipo_disp = modelo.id_tipo_disp) join marca on (marca.id_marca = modelo.id_marca) where nom_disp like '%rsw%'"
+		Query.MakeQuery(query)
+
+	#todos los servers
+	elif args.srv:
+		query = "select dispositivo.serial, dispositivo.nom_disp, dispositivo.ip_disp, modelo.nom_modelo, tipo_disp.nom_tipo_disp, marca.nom_marca from dispositivo join modelo on (dispositivo.id_modelo = modelo.id_modelo) join tipo_disp on (tipo_disp.id_tipo_disp = modelo.id_tipo_disp) join marca on (marca.id_marca = modelo.id_marca) where nom_disp like '%srv%'"
+		Query.MakeQuery(query)
+
+	#todos los dispositivos solo el nombre
+	elif args.l:
+		query = "select dispositivo.nom_disp from dispositivo"
+		Query.MakeQuery(query)
+	
+	#todos los dispositivos con una mayor informacion
+	elif args.lc:
+		#generamos la consulta...
+		query = "select dispositivo.serial, dispositivo.nom_disp, dispositivo.ip_disp, modelo.nom_modelo, tipo_disp.nom_tipo_disp, marca.nom_marca from dispositivo join modelo on (dispositivo.id_modelo = modelo.id_modelo) join tipo_disp on (tipo_disp.id_tipo_disp = modelo.id_tipo_disp) join marca on (marca.id_marca = modelo.id_marca)"
+		Query.MakeQuery(query)
+
+	#todos los campus
+	elif args.c:
+		#generamos la consulta
+		query = "select * from campus"
+		Query.MakeQuery(query)
+
+	#todos los edificios
+	elif args.e:
+		#generamos la consulta
+		query = "select id_edif, nom_edif, nom_campus from edificio join campus on (edificio.id_campus = campus.id_campus)"
+		Query.MakeQuery(query)
+	#ejecutamos la consulta que ingrese el usuario
+	elif args.qu:
+		query = raw_input("ingresa la consulta")
+		Query.MakeQuery(query)
+	
+	#ejecutamos la consulta para generar el arbol...
+	elif args.tree_dispo:
+
+		Query.CreateTreeBySerial(args.tree_dispo)
+
+	else:
+		#No set any argument
+		parser.print_help()
+
+	return  0
+
+if __name__ == '__main__':
+	main()

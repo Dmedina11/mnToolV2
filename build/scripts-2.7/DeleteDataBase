@@ -1,0 +1,99 @@
+#!/usr/bin/python
+
+# QueryDatabase, script que permite generar consultas a la base de datos, estas consultas son:
+# Listar todos los dispositivos
+# Listar todos los campos
+# Listar todos los edificios
+# Listar todos los dispositivos con toda la informacion
+# Listar todos los switch 
+# Listar todos los rowter
+# Listar todos los server
+# Ejecutar una consulta dada por argumento
+# 
+# Copyright (C) 20/10/2015 David Alfredo Medina Ortiz  dmedina11@alumnos.utalca.cl
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3 of the License, or
+# any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software Foundation,
+# Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301  USA
+
+#Modulos a utilizar
+import argparse
+from ModulosDevice.Cruds import delete
+
+#funcion principal...
+def main ():
+
+	#creamos argparse
+	parser = argparse.ArgumentParser(
+	formatter_class=argparse.RawDescriptionHelpFormatter,
+	description="Delete Database - Options",
+	epilog=".....................\n.....................")
+
+	#Set arguments
+	#Set arguments
+	parser.add_argument("-c", "--campus", help="Eliminar un campus dado su id")
+	parser.add_argument("-e", "--edificio", help="Eliminar un edificio dado su id")
+	parser.add_argument("-d", "--dispositivo", help="Eliminar un dispositivo dado su serial")
+	parser.add_argument("-m", "--marca", help="Eliminar una marca dada su id")
+	parser.add_argument("-mo", "--modelo", help="Eliminar un modelo dado su id")
+	parser.add_argument("-r", "--rack", help="Eliminar un rack dado su id")
+	parser.add_argument("-n", "--nivel", help="Eliminar un nivel dado su id")
+	parser.add_argument("-t", "--tipo", help="Eliminar un tipo de dispositivo dado su id")
+	parser.add_argument("-en", "--tipo_enlace", help="Eliminar un tipo de enlace dado su id")
+
+	#Parse argv to args 
+	args = parser.parse_args()
+	
+	#seleccion de opciones
+	#si desea eliminar un campus:
+	if args.campus:
+		delete.DeleteCampus(int(args.campus))
+	
+	#si desea eliminar edificios:
+	elif args.edificio:
+		delete.DeleteEdificio(int(args.edificio))
+
+	#si desea eliminar marca
+	elif args.marca:
+		delete.DeleteMarca(int(args.marca))
+
+	#si desea eliminar un modelo
+	elif args.modelo:
+		delete.DeleteModelo(int(args.modelo))
+
+	#si desea eliminar un rack
+	elif args.rack:
+		delete.DeleteRack(int(args.rack))
+
+	#si desea eliminar un nivel
+	elif args.nivel:
+		delete.DeleteNivel(int(args.nivel))
+	
+	#si desea eliminar un dispositivo
+	elif args.dispositivo:
+		delete.DeleteDevice(args.dispositivo)
+
+	#si desea eliminar un tipo de dispositivo
+	elif args.tipo:
+		delete.DeleteTipoDispositivo(int(args.tipo))
+	
+	#si desea eliminar un tipo de enlace
+	elif args.tipo_enlace:
+		delete.DeleteTipoEnlace(int(args.tipo_enlace))
+		
+	else:
+		parser.print_help()
+	return  0
+
+if __name__ == '__main__':
+	main()

@@ -1,0 +1,301 @@
+#!/usr/bin/python
+
+# InsertDataBase, script que permite gestionar el ingreso de datos a la base de datos.
+# 
+# Copyright (C) 20/10/2015 David Alfredo Medina Ortiz  dmedina11@alumnos.utalca.cl
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3 of the License, or
+# any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software Foundation,
+# Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301  USA
+
+#nota: validar que las relaciones existan cuando se ingresan elementos con las relaciones necesarias...
+
+#Modulos a utilizar
+import argparse
+from ModulosDevice.Cruds import Query
+
+#funcion que permite crear los mensajes de ayuda
+def CreateHelpMessage():
+
+	help_message = {}#creamos diccionario y agregamos los mensajes
+	help_message.update({'campus':'Agregar un campus: id_campus nombre_campus'})
+	help_message.update({'edificio':'gregar un edificio edificio: id_edificio id_campus nombre_edificio'})
+	help_message.update({'dispositivo':'Agregar un dispositivo: serial id_modelo nom_disp obs_disp ip_disp id_rack ptas_disp'})
+	help_message.update({'dispositivo_padre':'Agregar un dispositivo con su padre: serial id_modelo nom_disp obs_disp ip_disp id_rack ptas_disp serialPadre'})
+	help_message.update({'marca': 'Agregar una marca: id_marca nombre_marca'})
+	help_message.update({'modelo': 'Agregar un modelo: id_modelo id_tipo_disp id_marca nom_modelo'})
+	help_message.update({'rack': 'Agregar un rack:  id_rack id_nivel id_edif detalle'})
+	help_message.update({'nivel': 'Agregar un nivel:  id_nivel nom_nivel'})
+	help_message.update({'tipo': 'Agregar un tipo de dispositivo: id_tipo_disp nom_tipo_disp'})
+	help_message.update({'enlace': 'Agregar un tipo de enlace: id_tipo_enlace nom_tipo_enlace'})
+
+	return help_message#retornamos el diccionario
+
+#funcion que retorna un string dado una lista separada en sus :
+def GenerateString(list_element):
+
+	string_query = ""#contendra la lista en vacio...
+
+	#recorremos la lista y agregamos al elemento...
+	for i in range (len(list_element)):
+		if i == 0:
+			string_query = list_element[i]
+		else:
+			string_query = string_query + " " + list_element[i]
+	return string_query
+
+#funcion principal...
+def main ():
+
+	#creamos argparse
+	parser = argparse.ArgumentParser(
+	formatter_class=argparse.RawDescriptionHelpFormatter,
+	description="Insert Database - Options",
+	epilog=".....................\n.....................")
+
+	#creamos el diccionario y comenzamos a agregar los marcos de ayuda...
+	help_message = CreateHelpMessage()
+	#Set arguments
+	parser.add_argument("-c", "--campus", help=help_message['campus'],action="store_true")
+	parser.add_argument("-e", "--edificio", help=help_message['edificio'],action="store_true")
+	parser.add_argument("-d", "--dispositivo", help=help_message['dispositivo'],action="store_true")
+	parser.add_argument("-dp", "--dispositivo_padre", help=help_message['dispositivo_padre'],action="store_true")
+	parser.add_argument("-m", "--marca", help=help_message['marca'],action="store_true")
+	parser.add_argument("-mo", "--modelo", help=help_message['modelo'],action="store_true")
+	parser.add_argument("-r", "--rack", help=help_message['rack'],action="store_true")
+	parser.add_argument("-n", "--nivel", help=help_message['nivel'],action="store_true")
+	parser.add_argument("-t", "--tipo_dispositivo", help=help_message['tipo'],action="store_true")
+	parser.add_argument("-en", "--tipo_enlace", help=help_message['enlace'],action="store_true")
+
+	#Parse argv to args 
+	args = parser.parse_args()
+	
+	#seleccion de opciones
+	#si desea agregar una marca...
+	if args.marca:
+		id_marca = int(raw_input("Ingrese el id de la marca: "))
+		nom_marca= raw_input("Ingrese el nombre de la marca: ")
+		
+		#evaluamos si existe el elemento...
+		query = "select * from marca where marca.id_marca = %d"%id_marca
+		if Query.ExistElementInDB(query) == 1:
+			query = "INSERT INTO marca VALUES (%d, '%s')"% (id_marca, nom_marca)
+			Query.InsertDB(query)
+		else:
+			print "elemento ya existe, favor revisar los datos ingresados"
+
+	#si desea agregar un tipo de dispositivo...
+	elif args.tipo_dispositivo:
+		id_tipo = int(raw_input("Ingrese el id del tipo de dispositivo: "))
+		tipo= raw_input("Ingrese el tipo de dispositivo: ")
+		
+		#evaluamos si existe el elemento...
+		query = "select * from tipo_disp where id_tipo_disp = %d" % id_tipo
+		if Query.ExistElementInDB(query) == 1:
+			query = "INSERT INTO tipo_disp VALUES (%d, '%s')" % (id_tipo, tipo)
+			Query.InsertDB(query)
+		else:
+			print "elemento ya existe, favor revisar los datos ingresados"
+
+	#si desea agregar un modelo
+	elif args.modelo:
+		id_modelo = int (raw_input("Ingrese el id del modelo: "))
+		id_tipo = int (raw_input("Ingrese el id del tipo de dispositivo: "))
+		id_marca = int (raw_input("Ingrese el id de la marca: "))
+		nom_modelo = raw_input("Ingrese el nombre del modelo: ")
+
+		#evaluamos si el elemento existe...
+		query = "select * from modelo where id_modelo = %d" % id_modelo
+		if Query.ExistElementInDB(query) == 1:
+
+			#evaluamos si existe el tipo...
+			query = "select * from tipo_dispositivo where id_tipo_disp = %d" % id_tipo
+			if (Query.ExistElementInDB(query) == 0):
+
+				#evaluamos si existe el id de la marca...
+				query = "select * from marca where marca.id_marca = %d"%id_marca
+				if (Query.ExistElementInDB(query) == 0):				
+					query = "INSERT INTO modelo VALUES (%d, %d, %d, '%s')"% (id_modelo, id_tipo, id_marca, nom_modelo)
+					Query.InsertDB(query)
+				else:
+					print "El id de la marca no se encuentra registrado"
+			else:
+				print "El id del tipo de dispositivo no se encuentra registrado"
+		else:
+			print "elemento ya existe, favor revisar los datos ingresados"		
+	
+	#si desea agregar un campus...
+	elif args.campus:
+		id_campus = int (raw_input("Ingrese el id del campus: "))
+		nombre = raw_input("Ingrese el nombre del campus: ")
+		#evaluamos si existe el elemento...
+		query = "select * from campus where id_campus = %d" % id_campus
+		if Query.ExistElementInDB(query) == 1:
+			query = "INSERT INTO campus VALUES (%d, '%s')" %(id_campus, nombre)
+			Query.InsertDB(query)
+		else:
+			print "elemento ya existe, favor revisar los datos ingresados"			
+
+	#si desea agregar un edificio...
+	elif args.edificio:
+		id_edificio = int (raw_input("Ingrese el id del edificio: "))
+		id_campus = int (raw_input("Ingrese el id del campus: "))
+		nombre = raw_input("Ingrese el nombre del edificio: ")
+		#evaluamos si existe el elemenot...
+		query = "select * from edificio where id_edif = %d" % id_edificio
+		if Query.ExistElementInDB(query) == 1:
+
+			#evaluamos si existe el id del campus...
+			query = "select * from campus where id_campus = %d" % id_campus
+			if Query.ExistElementInDB(query) == 0:
+				query = "INSERT INTO edificio VALUES (%d, %d, '%s')"%(id_edificio, id_campus, nombre)
+				Query.InsertDB(query)
+			else:
+				print "El id del campus no se encuentra registrado"
+		else:
+			print "elemento ya existe, favor revisar los datos ingresados"
+
+	#si desea agregar un nivel:
+	elif args.nivel:
+		id_nivel = int (raw_input("Ingrese el id del nivel: "))
+		nombre_nivel = raw_input("Ingrese el nombre del nivel: ")
+		#evaluamos si existe el elemento a insertar
+		query = "select * from nivel where id_nivel = %d" % id_nivel
+		if Query.ExistElementInDB(query) == 1:
+			query = "INSERT INTO nivel VALUES (%d, '%s')" % (id_nivel, nombre_nivel)
+			Query.InsertDB(query)
+		else:
+			print "elemento ya existe, favor revisar los datos ingresados"		
+
+	#si desea agregar un rack:
+	elif args.rack:
+		id_rack = int (raw_input("Ingrese el id del rack: "))
+		id_nivel = int (raw_input("Ingrese el id del nivel: "))
+		id_edificio = int (raw_input("Ingrese el id del edificio: "))
+		detalle = raw_input("Ingrese el detalle del rack: ")
+		#evaluamos si existe elemento a isnertar...
+		query = "select * from rack where id_rack = %d" % id_rack
+		if Query.ExistElementInDB(query) == 1:
+
+			#evaluamos si existe el nivel
+			query = "select * from nivel where id_nivel = %d" % id_nivel
+			if Query.ExistElementInDB(query) == 0:
+
+				#evaluamos si existe el edificio
+				query = "select * from edificio where id_edif = %d" % id_edificio
+				if Query.ExistElementInDB(query) == 0:				
+					query = "INSERT INTO rack VALUES (%d, %d, %d, '%s')" %(id_rack, id_nivel, id_edificio, detalle)
+					Query.InsertDB(query)
+				else:
+					print "El id del edificio no se encuentra registrado"
+			else:
+				print "El id del nivel no se encuentra registrado"
+		else:
+			print "elemento ya existe, favor revisar los datos ingresados"
+	
+	#si desea agregar un dispositivo....
+	elif args.dispositivo:
+		serial = raw_input("Ingrese la serial del dispositivo: ")
+		id_modelo = int (raw_input("Ingrese el id del modelo del dispositivo: "))
+		nombre = raw_input("Ingrese el nombre del dispositivo: ")
+		obs = raw_input("Ingrese la observacion del dispositivo: ")
+		ip_dispositivo = raw_input("Ingrese la IP del dispositivo: ")
+		id_rack = int (raw_input("Ingrese el id del rack: "))
+		ptas_disp = int (raw_input("Ingrese la cantidad de puertas del dispositivo: "))
+
+		#evaluamos si existe el dispositivo a insertar...
+		query = "select * from dispositivo where serial = '%s'" % serial
+		if Query.ExistElementInDB(query) == 1:
+
+			#evaluamos si el modelo existe...
+			query = "select * from modelo where id_modelo = %d" % id_modelo
+			if Query.ExistElementInDB(query) == 0:
+
+				#evaluamos si existe el rack...
+				query = "select * from rack where id_rack = %d" % id_rack
+				if Query.ExistElementInDB(query) == 0:
+					#formamos la consulta...
+					query = "INSERT INTO dispositivo VALUES ('%s', %d, '%s', '%s', '%s', %d, %d)" % (serial, id_modelo, nombre, obs, ip_dispositivo, id_rack, ptas_disp)
+					Query.InsertDB(query)
+				else:
+					print "El id del rack no se encuentra registrado"
+			else:
+				print "El id del modelo no se encuentra registrado"
+		else:
+			print "elemento ya existe, favor revisar los datos ingresados"	
+
+	#agregamos un dispositivo con su dispositivo padre...
+	elif args.dispositivo_padre:
+		serial = raw_input("Ingrese la serial del dispositivo: ")
+		id_modelo = int (raw_input("Ingrese el id del modelo del dispositivo: "))
+		nombre = raw_input("Ingrese el nombre del dispositivo: ")
+		obs = raw_input("Ingrese la observacion del dispositivo: ")
+		ip_dispositivo = raw_input("Ingrese la IP del dispositivo: ")
+		id_rack = int (raw_input("Ingrese el id del rack: "))
+		ptas_disp = int (raw_input("Ingrese la cantidad de puertas del dispositivo: "))
+		padre = raw_input("Ingrese la serial del dispositivo padre: ")
+		tipo_enlace = int (raw_input("Ingrese el id del tipo de enlace: "))
+		
+		#evaluamos si existe el dispositivo a insertar...
+		query = "select * from dispositivo where serial = '%s'" % serial
+		if Query.ExistElementInDB(query) == 1:
+
+			#evaluamos si el modelo existe...
+			query = "select * from modelo where id_modelo = %d" % id_modelo
+			if Query.ExistElementInDB(query) == 0:
+
+				#evaluamos si existe el rack...
+				query = "select * from rack where id_rack = %d" % id_rack
+				if Query.ExistElementInDB(query) == 0:
+					
+					#evaluamos si existe el padre...
+					query = "select * from dispositivo where serial = '%s'"	% padre #solo si existe el padre se puede agregar el elemento...
+					if Query.ExistElementInDB(query) == 0:
+						#formamos la consulta...
+						query = "INSERT INTO dispositivo VALUES ('%s', %d, '%s', '%s', '%s', %d, %d)" % (serial, id_modelo, nombre, obs, ip_dispositivo, id_rack, ptas_disp)
+						print "Agregando dispositivo"
+						Query.InsertDB(query)
+
+						#formamos la consulta para anidar el equipo...
+						query = "INSERT INTO conecta VALUES ('%s', '%s', %d)" % (padre, serial, tipo_enlace)
+						print "Agregando la conexion"
+						Query.InsertDB(query)
+					else:
+						print "serial de padre no existe, favor revisar"
+				else:
+					print "El id del rack no se encuentra registrado"
+			else:
+				print "El id del modelo no se encuentra registrado"	
+		else:
+			print "elemento ya existe, favor revisar los datos ingresados"
+
+	#agreamos un tipo de enlace
+	elif args.tipo_enlace:
+		id_tipo_enlace= int(raw_input("Ingrese el id del tipo de enlace: "))
+		nombre_enlace = raw_input("Ingrese el nombre del enlace: ")
+		#evaluamos si existe...
+		query = "select * from tipo_enlace where id_tipo_enlace = %d" % id_tipo_enlace
+		if Query.ExistElementInDB(query) == 1:
+			query = "INSERT INTO tipo_enlace VALUES (%d, '%s')" % (id_tipo_enlace, nombre_enlace)
+			Query.InsertDB(query)
+		else:
+			print "elemento ya existe, favor revisar los datos ingresados"
+
+	else:
+		#No set any argument
+		parser.print_help()
+
+	return 0
+
+if __name__ == '__main__':
+	main()
